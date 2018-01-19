@@ -537,6 +537,14 @@
                         },
                         "number": {
                           "type": "string"
+                        },
+                        "issued_by": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "issued_at": {
+                          "type": "string",
+                          "format": "date"
                         }
                       },
                       "required": [
@@ -556,6 +564,14 @@
                         },
                         "number": {
                           "type": "string"
+                        },
+                        "issued_by": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "issued_at": {
+                          "type": "string",
+                          "format": "date"
                         }
                       },
                       "required": [
@@ -584,6 +600,13 @@
                         },
                         "type": {
                           "type": "string"
+                        },
+                        "issued_by": {
+                          "type": "string"
+                        },
+                        "issued_at": {
+                          "type": "string",
+                          "format": "date"
                         }
                       },
                       "required": [
@@ -643,6 +666,13 @@
             },
             "email": {
               "type": "string"
+            },
+            "preferred_way_communication": {
+              "type": "string",
+              "enum": [
+                "EMAIL",
+                "PHONE"
+              ]
             },
             "emergency_contact": {
               "additionalProperties": false,

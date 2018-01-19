@@ -100,6 +100,14 @@
         "number": {
           "type": "string",
           "minLength": 1
+        },
+        "issued_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date"
         }
       },
       "required": [
@@ -118,6 +126,14 @@
         "number": {
           "type": "string",
           "minLength": 1
+        },
+        "issued_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date"
         }
       },
       "required": [
@@ -190,6 +206,13 @@
             "email": {
               "type": "string",
               "format": "email"
+            },
+            "preferred_way_communication": {
+              "type": "string",
+              "enum": [
+                "EMAIL",
+                "PHONE"
+              ]
             },
             "tax_id": {
               "type": "string",
