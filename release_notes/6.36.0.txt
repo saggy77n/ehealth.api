@@ -1,0 +1,19 @@
+Change log for versions 6.36.0 - 6.36.7
+
+**Patches and bug fixes**:
+
+set logger truncate to infinity
+fix error related to confidant_person completely absent fron Json req.
+Log request params on 500
+Fix result parsing
+Log response from digital sign
+set trunk branch stable for building containers on Travis
+EHealth-1576: do not merge but replace additional info for employee from employee_request (#1588)
+
+**Other**:
+
+Revert "[patch] set logger truncate to infinity"
+This reverts commit 5ee94a5c6f28c7cc4d4c4e628069a58a241eee8d.
+Log response from digital sign (#1592)
+Require logger
+(cherry picked from commit 56e44ea)
