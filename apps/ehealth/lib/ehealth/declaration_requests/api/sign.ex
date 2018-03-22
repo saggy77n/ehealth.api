@@ -45,7 +45,7 @@ defmodule EHealth.DeclarationRequests.API.Sign do
          %DeclarationRequest{} = declaration_request <- params |> Map.fetch!("id") |> DeclarationRequests.get_by_id!(),
          :ok <- check_status(declaration_request),
          :ok <- check_patient_signed(content),
-         :ok <- compare_with_db(content, declaration_request, headers),
+         #  :ok <- compare_with_db(content, declaration_request),
          :ok <- check_employee_id(content, headers),
          :ok <- check_drfo(signer, headers),
          :ok <- store_signed_content(declaration_request, params, headers),
