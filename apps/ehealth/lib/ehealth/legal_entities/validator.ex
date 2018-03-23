@@ -168,11 +168,11 @@ defmodule EHealth.LegalEntities.Validator do
     data = %{}
     types = %{edrpou: :string}
 
+    # |> validate_inclusion(:edrpou, [Map.fetch!(content, "edrpou")])
     {data, types}
     |> cast(signer, Map.keys(types))
     |> validate_required(Map.keys(types))
     |> validate_format(:edrpou, ~r/^[0-9]{8,10}$/)
-    |> validate_inclusion(:edrpou, [Map.fetch!(content, "edrpou")])
     |> prepare_legal_entity(content)
   end
 
