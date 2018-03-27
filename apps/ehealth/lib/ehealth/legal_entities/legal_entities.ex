@@ -199,7 +199,7 @@ defmodule EHealth.LegalEntities do
     with {:ok, request_params} <- Validator.decode_and_validate(attrs, headers),
          edrpou <- Map.fetch!(request_params, "edrpou"),
          type <- Map.fetch!(request_params, "type"),
-         #  legal_entity <- get_or_create_by_edrpou_type(edrpou, type),
+         legal_entity <- get_or_create_by_edrpou_type(edrpou, type),
          :ok <- check_status(legal_entity),
          {:ok, _} <- store_signed_content(legal_entity.id, attrs, headers),
          request_params <- put_mis_verified_state(request_params),
