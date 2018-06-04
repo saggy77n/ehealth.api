@@ -330,7 +330,7 @@ defmodule Mithril.Web.RegistrationControllerTest do
       end)
 
       expect(MithrilMock, :create_user, fn params, _headers ->
-        Enum.each(~w(otp tax_id person_id email password 2fa_enable factor), fn key ->
+        Enum.each(~w(otp tax_id email password 2fa_enable factor), fn key ->
           assert Map.has_key?(params, key)
         end)
 
@@ -341,6 +341,13 @@ defmodule Mithril.Web.RegistrationControllerTest do
 
         {:ok, %{"data" => data}}
       end)
+
+      expect(MithrilMock, :change_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
+      end)
+
 
       uaddresses_mock_expect()
 
@@ -375,7 +382,7 @@ defmodule Mithril.Web.RegistrationControllerTest do
       end)
 
       expect(MithrilMock, :create_user, fn params, _headers ->
-        Enum.each(~w(otp tax_id person_id email password 2fa_enable factor), fn key ->
+        Enum.each(~w(otp tax_id email password 2fa_enable factor), fn key ->
           assert Map.has_key?(params, key)
         end)
 
@@ -385,6 +392,12 @@ defmodule Mithril.Web.RegistrationControllerTest do
           |> Map.delete("password")
 
         {:ok, %{"data" => data}}
+      end)
+
+      expect(MithrilMock, :change_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
       end)
 
       uaddresses_mock_expect()
@@ -433,6 +446,13 @@ defmodule Mithril.Web.RegistrationControllerTest do
         {:ok, %{"data" => data}}
       end)
 
+      expect(MithrilMock, :change_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
+      end)
+
+
       uaddresses_mock_expect()
 
       conn
@@ -472,6 +492,13 @@ defmodule Mithril.Web.RegistrationControllerTest do
 
         {:ok, %{"data" => data}}
       end)
+
+      expect(MithrilMock, :change_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
+      end)
+
 
       uaddresses_mock_expect()
 
@@ -846,6 +873,16 @@ defmodule Mithril.Web.RegistrationControllerTest do
         {:ok, %{"data" => []}}
       end)
 
+      expect(MithrilMock, :create_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
+      end)
+
+      expect(MithrilMock, :delete_user, fn id, _headers ->
+        {:ok, %{"data" => ""}}
+      end)
+
       expect(MPIMock, :create_or_update_person!, fn _params, _headers ->
         {:error,
          %{
@@ -889,12 +926,6 @@ defmodule Mithril.Web.RegistrationControllerTest do
 
       expect(MPIMock, :search, fn %{"tax_id" => "3126509816", "birth_date" => _}, _headers ->
         {:ok, %{"data" => []}}
-      end)
-
-      expect(MPIMock, :create_or_update_person!, fn params, _headers ->
-        refute Map.has_key?(params, "id")
-        assert Map.has_key?(params, "patient_signed")
-        {:ok, %{"data" => Map.put(params, "id", UUID.generate())}}
       end)
 
       expect(MithrilMock, :search_user, fn %{email: "email@example.com"}, _headers ->

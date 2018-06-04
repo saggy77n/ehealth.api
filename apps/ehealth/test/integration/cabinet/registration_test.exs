@@ -53,23 +53,6 @@ defmodule EHealth.Integration.Cabinet.RegistrationTest do
         {:ok, %{"data" => []}}
       end)
 
-      expect(MPIMock, :create_or_update_person!, fn params, _headers ->
-        refute Map.has_key?(params, "id")
-        {:ok, %{"data" => Map.put(params, "id", UUID.generate())}}
-      end)
-
-      expect(MithrilMock, :search_user, 3, fn %{email: ^email}, _headers ->
-        {:ok, %{"data" => []}}
-      end)
-
-      expect(MithrilMock, :search_user, fn %{tax_id: ^tax_id}, _headers ->
-        {:ok, %{"data" => []}}
-      end)
-
-      expect(MithrilMock, :search_user, fn %{email: ^email}, _headers ->
-        {:ok, %{"data" => []}}
-      end)
-
       expect(MithrilMock, :create_user, fn params, _headers ->
         Enum.each(~w(otp tax_id email password), fn key ->
           assert Map.has_key?(params, key)
@@ -84,6 +67,31 @@ defmodule EHealth.Integration.Cabinet.RegistrationTest do
 
         {:ok, %{"data" => data}}
       end)
+
+      expect(MPIMock, :create_or_update_person!, fn params, _headers ->
+        refute Map.has_key?(params, "id")
+        {:ok, %{"data" => Map.put(params, "id", UUID.generate())}}
+      end)
+
+      expect(MithrilMock, :change_user, fn id, params, _headers ->
+        assert Map.has_key?(params, "person_id")
+
+        {:ok, %{"data" => Map.put(params, "id", id)}}
+      end)
+
+      expect(MithrilMock, :search_user, 3, fn %{email: ^email}, _headers ->
+        {:ok, %{"data" => []}}
+      end)
+
+      expect(MithrilMock, :search_user, fn %{tax_id: ^tax_id}, _headers ->
+        {:ok, %{"data" => []}}
+      end)
+
+      expect(MithrilMock, :search_user, fn %{email: ^email}, _headers ->
+        {:ok, %{"data" => []}}
+      end)
+
+
 
       expect(MithrilMock, :create_global_user_role, fn _user_id, params, _headers ->
         Enum.each(~w(role_id)a, fn key ->

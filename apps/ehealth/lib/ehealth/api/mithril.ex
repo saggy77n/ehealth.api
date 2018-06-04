@@ -67,6 +67,10 @@ defmodule EHealth.API.Mithril do
     put!("/admin/users/#{id}", Jason.encode!(%{"user" => attrs}), headers)
   end
 
+  def delete_user(id, headers \\ []) do
+    delete!("/admin/users/#{id}", headers)
+  end
+
   # Roles
 
   def get_roles_by_name(name, headers \\ []) do

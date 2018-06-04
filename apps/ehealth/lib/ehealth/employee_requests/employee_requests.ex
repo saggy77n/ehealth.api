@@ -5,28 +5,22 @@ defmodule EHealth.EmployeeRequests do
   import Ecto.Changeset
   import EHealth.Utils.Connection
 
-  alias EHealth.GlobalParameters
   alias EHealth.EmployeeRequests.EmployeeRequest, as: Request
-  alias EHealth.Repo
-  alias EHealth.Bamboo.Emails.Sender
-  alias EHealth.PRMRepo
-  alias EHealth.Employees.Employee
+  alias EHealth.{Repo, PRMRepo, LegalEntities, Employees, BlackListUsers, EventManager, GlobalParameters}
+  alias EHealth.Employees.{Employee, UserRoleCreator}
   alias EHealth.Divisions.Division
-  alias EHealth.LegalEntities
   alias EHealth.LegalEntities.LegalEntity
   alias EHealth.EmployeeRequests.Validator
+  alias EHealth.API.Mithril
   alias EHealth.OAuth.API, as: OAuth
   alias EHealth.Employee.UserCreateRequest
   alias EHealth.Man.Templates.EmployeeRequestInvitation, as: EmployeeRequestInvitationTemplate
   alias EHealth.Man.Templates.EmployeeRequestUpdateInvitation, as: EmployeeUpdateInvitationTemplate
   alias EHealth.Man.Templates.EmployeeCreatedNotification, as: EmployeeCreatedNotificationTemplate
-  alias EHealth.API.Mithril
-  alias EHealth.Employees
-  alias EHealth.BlackListUsers
-  alias EHealth.EventManager
   alias EHealth.Utils.Log
   alias EHealth.Email.Postmark
   alias EHealth.Validators.Reference
+  alias EHealth.Bamboo.Emails.Sender
 
   @status_new Request.status(:new)
   @status_approved Request.status(:approved)
@@ -164,19 +158,18 @@ defmodule EHealth.EmployeeRequests do
   end
 
   def create_user_by_employee_request(params, headers) do
-    %Request{data: data} =
-      params
-      |> Map.fetch!("id")
-      |> get_by_id!()
+    employee_request = get_by_id!(params["id"])
+    user_email = get_in(employee_request.data, ~w(party email))
 
-    user_email =
-      data
-      |> Map.fetch!("party")
-      |> Map.fetch!("email")
+#    with %{valid?: true} <- changeset(%UserCreateRequest{}, params),
+#         :ok <- maybe_create_roles?(employee_request.data, req_headers)
+#      do
+#      OAuth.create_user(user_email, headers)
+#    end
+  end
 
-    %UserCreateRequest{}
-    |> changeset(params)
-    |> OAuth.create_user(user_email, headers)
+  def maybe_create_roles(%{"employee_id" => employee_id}, req_headers) do
+
   end
 
   def reject(id, headers) do
