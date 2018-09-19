@@ -1,9 +1,16 @@
 defmodule Core.DeclarationRequests.API.V2.Creator do
   @moduledoc false
+  import Ecto.Changeset
+
+  alias Core.DeclarationRequests.DeclarationRequest
+  alias Core.DeclarationRequests.API.V1.Creator, as: V1Creator
+  alias Core.DeclarationRequests.API.V2.MpiSearch
+  alias Core.GlobalParameters
+  alias Core.Repo
   alias Ecto.Changeset
 
-  alias Core.DeclarationRequests.API.V2.MpiSearch
-  alias Core.DeclarationRequests.API.V1.Creator, as: V1Creator
+  @auth_na DeclarationRequest.authentication_method(:na)
+  @channel_cabinet DeclarationRequest.channel(:cabinet)
 
   def create(params, user_id, person, employee, division, legal_entity, headers) do
     global_parameters = GlobalParameters.get_values()
@@ -40,6 +47,12 @@ defmodule Core.DeclarationRequests.API.V2.Creator do
 
   defdelegate changeset(attrs, user_id, auxiliary_entities, headers), to: V1Creator
 
+  defdelegate generate_printout_form(changeset, employee), to: V1Creator
+  defdelegate do_insert_declaration_request(changeset), to: V1Creator
+  defdelegate do_determine_auth_method_for_mpi(person, chageset), to: V1Creator
+  defdelegate validate_employee_speciality(employee), to: V1Creator
+  defdelegate validate_employee_status(employee), to: V1Creator
+
   defp insert_declaration_request(params, user_id, auxiliary_entities, headers) do
     params
     |> changeset(user_id, auxiliary_entities, headers)
@@ -58,7 +71,8 @@ defmodule Core.DeclarationRequests.API.V2.Creator do
 
   def determine_auth_method_for_mpi(changeset, _, _) do
     changeset
-    |> get_field(:data)["person"]
+    |> get_field(:data)
+    |> get_in(["person"])
     |> mpi_search()
     |> do_determine_auth_method_for_mpi(changeset)
   end

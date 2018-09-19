@@ -37,7 +37,6 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
   @auth_otp DeclarationRequest.authentication_method(:otp)
   @auth_offline DeclarationRequest.authentication_method(:offline)
   @mithril_api Application.get_env(:core, :api_resolvers)[:mithril]
-
   @channel_cabinet DeclarationRequest.channel(:cabinet)
 
   @status_new DeclarationRequest.status(:new)
@@ -85,7 +84,6 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
     DeclarationRequest
     |> where([dr], dr.id in ^previous_request_ids)
     |> Repo.update_all(
-      query,
       set: [
         status: DeclarationRequest.status(:cancelled),
         updated_at: DateTime.utc_now(),
@@ -102,7 +100,7 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
     |> do_insert_declaration_request()
   end
 
-  defp do_insert_declaration_request(changeset) do
+  def do_insert_declaration_request(changeset) do
     case Repo.insert(changeset) do
       {:ok, declaration_request} ->
         {:ok, declaration_request}
@@ -313,8 +311,7 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
       employee: employee,
       global_parameters: global_parameters,
       division: division,
-      legal_entity: legal_entity,
-      person_id: person_id
+      legal_entity: legal_entity
     } = auxiliary_entities
 
     employee_speciality_officio = employee.speciality["speciality"]
@@ -665,7 +662,8 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
 
   def determine_auth_method_for_mpi(changeset, _, _) do
     changeset
-    |> get_field(:data)["person"]
+    |> get_field(:data)
+    |> get_in(["person"])
     |> mpi_search()
     |> do_determine_auth_method_for_mpi(changeset)
   end

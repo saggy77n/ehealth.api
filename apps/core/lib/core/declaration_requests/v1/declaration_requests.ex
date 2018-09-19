@@ -6,10 +6,10 @@ defmodule Core.DeclarationRequests do
   import Ecto.Query
 
   alias Core.DeclarationRequests.API.Approve
-  alias Core.DeclarationRequests.API.V1.Creator
   alias Core.DeclarationRequests.API.Documents
   alias Core.DeclarationRequests.API.ResendOTP
   alias Core.DeclarationRequests.API.Sign
+  alias Core.DeclarationRequests.API.V1.Creator
   alias Core.DeclarationRequests.DeclarationRequest
   alias Core.Divisions.Division
   alias Core.Email.Sanitizer
