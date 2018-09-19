@@ -89,7 +89,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     end)
   end
 
-  defp insert_declaration_request(params, user_id, auxiliary_entities, headers) do
+  def insert_declaration_request(params, user_id, auxiliary_entities, headers) do
     params
     |> changeset(user_id, auxiliary_entities, headers)
     |> do_insert_declaration_request()
@@ -199,7 +199,7 @@ defmodule Core.DeclarationRequests.API.Creator do
          do: get_user_email(user_id)
   end
 
-  defp put_in_data(changeset, keys, value) do
+  def put_in_data(changeset, keys, value) do
     new_data =
       changeset
       |> get_field(:data)
@@ -208,7 +208,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     put_change(changeset, :data, new_data)
   end
 
-  defp format_error_response(microservice, result) do
+  def format_error_response(microservice, result) do
     "Error during #{microservice} interaction. Result from #{microservice}: #{inspect(result)}"
   end
 
@@ -349,7 +349,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     |> generate_printout_form(employee)
   end
 
-  defp validate_legal_entity_employee(changeset, legal_entity, employee) do
+  def validate_legal_entity_employee(changeset, legal_entity, employee) do
     validate_change(changeset, :data, fn :data, _data ->
       case employee.legal_entity_id == legal_entity.id do
         true -> []
@@ -358,7 +358,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     end)
   end
 
-  defp validate_legal_entity_division(changeset, legal_entity, division) do
+  def validate_legal_entity_division(changeset, legal_entity, division) do
     validate_change(changeset, :data, fn :data, _data ->
       case division.legal_entity_id == legal_entity.id do
         true -> []
@@ -415,7 +415,7 @@ defmodule Core.DeclarationRequests.API.Creator do
   def belongs_to(age, adult_age, @pediatrician), do: age < string_to_integer(adult_age)
   def belongs_to(_age, _adult_age, @family_doctor), do: true
 
-  defp validate_authentication_method_phone_number(changeset, headers) do
+  def validate_authentication_method_phone_number(changeset, headers) do
     validate_change(changeset, :data, fn :data, data ->
       result =
         data
@@ -537,7 +537,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     {i + 1, changeset}
   end
 
-  defp put_start_end_dates(changeset, employee_speciality_officio, global_parameters) do
+  def put_start_end_dates(changeset, employee_speciality_officio, global_parameters) do
     %{
       "declaration_term" => term,
       "declaration_term_unit" => unit,
@@ -568,7 +568,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     put_change(changeset, :data, new_data)
   end
 
-  defp prepare_employee_struct(employee) do
+  def prepare_employee_struct(employee) do
     %{
       "id" => employee.id,
       "position" => employee.position,
@@ -583,7 +583,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     }
   end
 
-  defp prepare_division_struct(division) do
+  def prepare_division_struct(division) do
     %{
       "id" => division.id,
       "type" => division.type,
@@ -596,7 +596,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     }
   end
 
-  defp prepare_addresses(addresses) do
+  def prepare_addresses(addresses) do
     Enum.map(addresses, fn address ->
       address
       |> Jason.encode!()
@@ -605,7 +605,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     end)
   end
 
-  defp prepare_legal_entity_struct(legal_entity) do
+  def prepare_legal_entity_struct(legal_entity) do
     %{
       "id" => legal_entity.id,
       "name" => legal_entity.name,
@@ -621,7 +621,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     }
   end
 
-  defp put_declaration_number(changeset) do
+  def put_declaration_number(changeset) do
     with {:ok, sequence} <- get_sequence_number() do
       put_change(changeset, :declaration_number, NumberGenerator.generate_from_sequence(1, sequence))
     else
@@ -677,7 +677,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     end
   end
 
-  defp do_determine_auth_method_for_mpi(person, changeset) do
+  def do_determine_auth_method_for_mpi(person, changeset) do
     authentication_method = List.first(person["authentication_methods"] || [])
     authenticated_methods = changeset |> get_field(:data) |> get_in(~w(person authentication_methods)) |> hd
 
