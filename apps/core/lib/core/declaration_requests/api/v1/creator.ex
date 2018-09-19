@@ -95,7 +95,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     |> do_insert_declaration_request()
   end
 
-  defp do_insert_declaration_request(changeset) do
+  def do_insert_declaration_request(changeset) do
     case Repo.insert(changeset) do
       {:ok, declaration_request} ->
         {:ok, declaration_request}
@@ -304,23 +304,35 @@ defmodule Core.DeclarationRequests.API.Creator do
   def changeset(attrs, user_id, auxiliary_entities, headers) do
     %{
       employee: employee,
-      global_parameters: global_parameters,
-      division: division,
-      legal_entity: legal_entity,
       person_id: person_id
     } = auxiliary_entities
-
-    employee_speciality_officio = employee.speciality["speciality"]
 
     overlimit = Map.get(attrs, "overlimit", false)
     channel = attrs["channel"]
     attrs = Map.drop(attrs, ~w(person_id employee_id division_id overlimit))
 
     id = UUID.generate()
-    declaration_id = UUID.generate()
 
     %DeclarationRequest{id: id}
     |> cast(%{data: attrs, overlimit: overlimit, channel: channel}, ~w(data overlimit channel)a)
+    |> validate_declaration_request_changeset(auxiliary_entities, headers)
+    |> put_data_changes_declaration_request_changeset(id, user_id, auxiliary_entities)
+    |> unique_constraint(:declaration_number, name: :declaration_requests_declaration_number_index)
+    |> determine_auth_method_for_mpi(channel, person_id)
+    |> generate_printout_form(employee)
+  end
+
+  def validate_declaration_request_changeset(changeset, auxiliary_entities, headers) do
+    %{
+      employee: employee,
+      global_parameters: global_parameters,
+      division: division,
+      legal_entity: legal_entity
+    } = auxiliary_entities
+
+    employee_speciality_officio = employee.speciality["speciality"]
+
+    changeset
     |> validate_legal_entity_employee(legal_entity, employee)
     |> validate_legal_entity_division(legal_entity, division)
     |> validate_employee_type(employee)
@@ -332,6 +344,20 @@ defmodule Core.DeclarationRequests.API.Creator do
     |> validate_confidant_persons_tax_id()
     |> validate_confidant_person_rel_type()
     |> validate_authentication_methods()
+  end
+
+  def put_data_changes_declaration_request_changeset(changeset, id, user_id, auxiliary_entities) do
+    %{
+      employee: employee,
+      global_parameters: global_parameters,
+      division: division,
+      legal_entity: legal_entity
+    } = auxiliary_entities
+
+    employee_speciality_officio = employee.speciality["speciality"]
+    declaration_id = UUID.generate()
+
+    changeset
     |> put_start_end_dates(employee_speciality_officio, global_parameters)
     |> put_in_data(["employee"], prepare_employee_struct(employee))
     |> put_in_data(["division"], prepare_division_struct(division))
@@ -343,10 +369,7 @@ defmodule Core.DeclarationRequests.API.Creator do
     |> put_change(:inserted_by, user_id)
     |> put_change(:updated_by, user_id)
     |> put_declaration_number()
-    |> unique_constraint(:declaration_number, name: :declaration_requests_declaration_number_index)
     |> put_party_email()
-    |> determine_auth_method_for_mpi(channel, person_id)
-    |> generate_printout_form(employee)
   end
 
   def validate_legal_entity_employee(changeset, legal_entity, employee) do
@@ -660,14 +683,15 @@ defmodule Core.DeclarationRequests.API.Creator do
 
   def determine_auth_method_for_mpi(changeset, _, _) do
     data = get_field(changeset, :data)
+    search_params = Persons.get_search_params(data["person"])
 
-    case @mpi_api.search(Persons.get_search_params(data["person"]), []) do
-      {:ok, %{"data" => [person]}} ->
-        do_determine_auth_method_for_mpi(person, changeset)
-
-      {:ok, %{"data" => _}} ->
+    case search_mpi_matching_person(search_params) do
+      {:ok, :no_match} ->
         authentication_method = hd(data["person"]["authentication_methods"])
         put_change(changeset, :authentication_method_current, prepare_auth_method_current(authentication_method))
+
+      {:ok, person} ->
+        do_determine_auth_method_for_mpi(person, changeset)
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         add_error(changeset, :authentication_method_current, format_error_response("MPI", reason))
@@ -691,6 +715,19 @@ defmodule Core.DeclarationRequests.API.Creator do
     changeset
     |> put_change(:authentication_method_current, authentication_method_current)
     |> put_change(:mpi_id, person["id"])
+  end
+
+  defp search_mpi_matching_person(search_params) do
+    case @mpi_api.search(search_params, []) do
+      {:ok, %{"data" => [person]}} ->
+        {:ok, person}
+
+      {:ok, %{"data" => _}} ->
+        {:ok, :no_match}
+
+      error ->
+        error
+    end
   end
 
   def generate_printout_form(%Changeset{valid?: false} = changeset, _), do: changeset
