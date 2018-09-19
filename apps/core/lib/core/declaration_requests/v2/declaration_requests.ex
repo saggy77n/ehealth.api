@@ -4,7 +4,7 @@ defmodule Core.V2.DeclarationRequests do
   import Core.API.Helpers.Connection, only: [get_consumer_id: 1, get_client_id: 1]
 
   alias Core.DeclarationRequests, as: V1DeclarationRequests
-  alias Core.DeclarationRequests.API.Creator
+  alias Core.DeclarationRequests.API.V2.Creator
   alias Core.DeclarationRequests.DeclarationRequest
   alias Core.Divisions.Division
   alias Core.Employees.Employee

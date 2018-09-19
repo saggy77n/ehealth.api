@@ -1,4 +1,4 @@
-defmodule Core.DeclarationRequests.API.CreatorTest do
+defmodule Core.DeclarationRequests.API.V1.CreatorTest do
   @moduledoc false
 
   use Core.ConnCase, async: true
@@ -7,7 +7,7 @@ defmodule Core.DeclarationRequests.API.CreatorTest do
 
   alias Ecto.UUID
   alias Core.DeclarationRequests.DeclarationRequest
-  alias Core.DeclarationRequests.API.Creator
+  alias Core.DeclarationRequests.API.V1.Creator
   alias Core.Repo
   alias Core.Utils.NumberGenerator
 

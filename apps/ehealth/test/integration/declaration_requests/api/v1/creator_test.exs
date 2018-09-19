@@ -1,4 +1,4 @@
-defmodule EHealth.Integraiton.DeclarationRequest.API.CreateTest do
+defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
   @moduledoc false
 
   use EHealth.Web.ConnCase
@@ -6,7 +6,7 @@ defmodule EHealth.Integraiton.DeclarationRequest.API.CreateTest do
   import Mox
   import Ecto.Changeset, only: [get_change: 2, put_change: 3]
 
-  alias Core.DeclarationRequests.API.Creator
+  alias Core.DeclarationRequests.API.V1.Creator
   alias Core.DeclarationRequests.DeclarationRequest
   alias Core.Utils.NumberGenerator
   alias Ecto.UUID
