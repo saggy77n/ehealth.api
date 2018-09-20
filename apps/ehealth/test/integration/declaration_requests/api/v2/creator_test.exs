@@ -1,4 +1,4 @@
-defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
+defmodule EHealth.Integraiton.DeclarationRequest.API.V2.CreateTest do
   @moduledoc false
 
   use EHealth.Web.ConnCase
@@ -6,7 +6,7 @@ defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
   import Mox
   import Ecto.Changeset, only: [get_change: 2, put_change: 3]
 
-  alias Core.DeclarationRequests.API.V1.Creator
+  alias Core.DeclarationRequests.API.V2.Creator
   alias Core.DeclarationRequests.DeclarationRequest
   alias Core.Utils.NumberGenerator
   alias Ecto.UUID
@@ -439,7 +439,7 @@ defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
   end
 
   describe "determine_auth_method_for_mpi/1, MPI has many existing records" do
-    test "auth method's type is set to NA if many persons" do
+    test "auth method's type is set to OTP password" do
       expect(MPIMock, :search, fn params, _ ->
         person =
           params
@@ -485,8 +485,8 @@ defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
           "b5350f79-f2ca-408f-b15d-1ae0a8cc861c"
         )
 
-      assert %{"type" => "NA"} == get_change(changeset, :authentication_method_current)
-      refute "b5350f79-f2ca-408f-b15d-1ae0a8cc861c" == get_change(changeset, :mpi_id)
+      assert %{"number" => "+380508887700", "type" => "OTP"} == get_change(changeset, :authentication_method_current)
+      assert "b5350f79-f2ca-408f-b15d-1ae0a8cc861c" == get_change(changeset, :mpi_id)
     end
   end
 
@@ -659,71 +659,6 @@ defmodule EHealth.Integraiton.DeclarationRequest.API.V1.CreateTest do
         |> Creator.determine_auth_method_for_mpi(DeclarationRequest.channel(:mis), UUID.generate())
 
       assert %{"type" => "OTP", "number" => "+380508887701"} == get_change(changeset, :authentication_method_current)
-    end
-  end
-
-  describe "put_party_email/1" do
-    test "user is not doctor" do
-      expect(MithrilMock, :get_roles_by_name, fn "DOCTOR", _headers ->
-        {:ok, %{"data" => [%{"id" => UUID.generate()}]}}
-      end)
-
-      types = %{"data" => :map}
-      data = %{"employee" => %{"party" => %{"id" => "6b4127ea-99ad-4493-b5ce-6f0769fa9fab"}}}
-      changes = %{data: data}
-      errors = [email: {"Current user is not a doctor", []}]
-
-      expected_result = %Ecto.Changeset{
-        action: nil,
-        changes: changes,
-        errors: errors,
-        data: data,
-        types: types,
-        valid?: false
-      }
-
-      result = Creator.put_party_email(%Ecto.Changeset{data: data, changes: changes, types: types, valid?: true})
-
-      assert expected_result == result
-    end
-
-    test "everything is ok" do
-      role_id = UUID.generate()
-      types = %{"data" => :map}
-      party_user = insert(:prm, :party_user)
-      data = %{"employee" => %{"party" => %{"id" => party_user.party_id}}}
-      expected_changes = %{data: put_in(data, ["employee", "party", "email"], "user@email.com")}
-      changes = %{data: data}
-
-      expect(MithrilMock, :get_roles_by_name, fn "DOCTOR", _headers ->
-        {:ok, %{"data" => [%{"id" => role_id}]}}
-      end)
-
-      expect(MithrilMock, :get_user_by_id, fn _, _ -> {:ok, %{"data" => %{"email" => "user@email.com"}}} end)
-
-      expect(MithrilMock, :get_user_roles, fn _, _, _ ->
-        {:ok,
-         %{
-           "data" => [
-             %{
-               "role_id" => role_id,
-               "user_id" => UUID.generate()
-             }
-           ]
-         }}
-      end)
-
-      expected_result = %Ecto.Changeset{
-        action: nil,
-        changes: expected_changes,
-        errors: [],
-        data: data,
-        types: types,
-        valid?: true
-      }
-
-      result = Creator.put_party_email(%Ecto.Changeset{data: data, changes: changes, types: types, valid?: true})
-      assert expected_result == result
     end
   end
 

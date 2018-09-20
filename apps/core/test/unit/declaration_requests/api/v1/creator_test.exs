@@ -587,6 +587,44 @@ defmodule Core.DeclarationRequests.API.V1.CreatorTest do
     end
   end
 
+  describe "mpi persons search" do
+    test "few mpi persons" do
+      expect(MPIMock, :search, fn _, _ ->
+        {:ok,
+         %{
+           "data" => [%{id: 1}, %{id: 2}]
+         }}
+      end)
+
+      assert {:ok, nil} =
+               Creator.mpi_search(%{"unzr" => "20160828-12345", "birth_date" => "2016-08-28", "tax_id" => "0123456789"})
+    end
+
+    test "one mpi persons" do
+      expect(MPIMock, :search, fn _, _ ->
+        {:ok,
+         %{
+           "data" => [%{id: 1}]
+         }}
+      end)
+
+      assert {:ok, %{id: 1}} =
+               Creator.mpi_search(%{"unzr" => "20160303-12345", "birth_date" => "2016-03-03", "tax_id" => "0123456789"})
+    end
+
+    test "no mpi persons" do
+      expect(MPIMock, :search, fn _, _ ->
+        {:ok,
+         %{
+           "data" => []
+         }}
+      end)
+
+      assert {:ok, nil} =
+               Creator.mpi_search(%{"unzr" => "20190101-12345", "birth_date" => "2019-01-01", "tax_id" => "1234567890"})
+    end
+  end
+
   defp copy_declaration_request(template, status) do
     attrs = %{
       "status" => status,

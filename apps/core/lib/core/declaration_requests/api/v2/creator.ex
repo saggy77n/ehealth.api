@@ -77,7 +77,7 @@ defmodule Core.DeclarationRequests.API.V2.Creator do
     |> do_determine_auth_method_for_mpi(changeset)
   end
 
-  defp mpi_search(person) do
+  def mpi_search(person) do
     MpiSearch.search(person)
   end
 end

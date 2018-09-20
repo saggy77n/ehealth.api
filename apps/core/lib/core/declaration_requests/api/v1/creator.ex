@@ -10,7 +10,7 @@ defmodule Core.DeclarationRequests.API.V1.Creator do
 
   alias Core.DeclarationRequests
   alias Core.DeclarationRequests.API.Documents
-  alias Core.DeclarationRequests.API.V2.MpiSearch
+  alias Core.DeclarationRequests.API.V1.MpiSearch
   alias Core.DeclarationRequests.DeclarationRequest
   alias Core.Employees.Employee
   alias Core.GlobalParameters
