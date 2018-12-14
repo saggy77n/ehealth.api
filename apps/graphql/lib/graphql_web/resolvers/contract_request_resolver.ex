@@ -33,7 +33,9 @@ defmodule GraphQLWeb.Resolvers.ContractRequestResolver do
 
       def list_contract_requests(args, %{context: %{client_type: "NHS"}}), do: list_contract_requests(args)
 
-      def list_contract_requests(args, %{context: %{client_type: unquote(opts[:restricted_client_type]), client_id: client_id}}) do
+      def list_contract_requests(args, %{
+            context: %{client_type: unquote(opts[:restricted_client_type]), client_id: client_id}
+          }) do
         args
         |> Map.update!(:filter, &[{:contractor_legal_entity_id, :equal, client_id} | &1])
         |> list_contract_requests()
