@@ -75,6 +75,8 @@ spec:
       value: "localhost"
     - name: ADVERTISED_PORT
       value: "9092"
+    - name: TOPICS
+      value: "merge_legal_entities"
     command:
     - cat
     tty: true
@@ -90,12 +92,6 @@ spec:
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
               psql -U postgres -c "create database event_manager_dev";
-              '''
-            }
-            container(name: 'kafka', shell: '/bin/sh') {
-              sh '''
-              sleep 600;
-              /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic merge_legal_entities
               '''
             }
             container(name: 'elixir', shell: '/bin/sh') {
