@@ -124,20 +124,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -165,6 +151,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
@@ -226,20 +214,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -267,6 +241,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
@@ -328,20 +304,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -369,6 +331,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
@@ -430,20 +394,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -471,6 +421,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
@@ -532,20 +484,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -573,6 +511,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
@@ -634,20 +574,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
   volumes:
@@ -675,6 +601,8 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
+              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
+              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
