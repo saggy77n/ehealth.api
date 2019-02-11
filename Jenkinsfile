@@ -1,16 +1,6 @@
 pipeline {
   agent none
   stages {
-    stage('Test and build') {
-      environment {
-        MIX_ENV = 'test'
-        DOCKER_NAMESPACE = 'edenlabllc'
-        POSTGRES_VERSION = '9.6'
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'postgres'
-        POSTGRES_DB = 'postgres'
-      }
-      parallel {
         stage('Test') {
           agent {
             kubernetes {
@@ -78,6 +68,14 @@ spec:
       limits:
         memory: "112Mi"
         cpu: "100m"
+  - name: kafka
+    image: spotify/kafka:latest
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    command:
+    - cat
+    tty: true
   nodeSelector:
     node: ci
 '''
@@ -102,6 +100,16 @@ spec:
             }
           }
         }
+    stage('Test and build') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
+      parallel {
         stage('Build ehealth') {
           environment {
             APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
