@@ -95,7 +95,7 @@ spec:
             }
             container(name: 'kafka', shell: '/bin/sh') {
               sh '''
-              sleep 60;
+              sleep 600;
               /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --partitions 1 --replication-factor 1 --zookeeper localhost:2181 --topic merge_legal_entities
               '''
             }
