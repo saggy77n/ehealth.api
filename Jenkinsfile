@@ -32,7 +32,7 @@ spec:
     - "travis"
   containers:
   - name: elixir
-    image: elixir:1.8.1
+    image: elixir:1.8.1-alpine
     command:
     - cat
     tty: true
