@@ -58,7 +58,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
 '''
             }
           }
@@ -139,7 +139,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -241,7 +241,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -343,7 +343,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -445,7 +445,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -547,7 +547,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -649,7 +649,7 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node-j: ci-builds
+    node: ci
   volumes:
   - name: volume
     hostPath:
@@ -722,7 +722,7 @@ spec:
 //     - cat
 //     tty: true
 //   nodeSelector:
-//     node-j: ci-builds
+//     node: ci
 // '''
 //         }
 //       }
