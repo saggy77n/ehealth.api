@@ -36,13 +36,6 @@ spec:
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -102,8 +95,9 @@ spec:
               sh '''
                 apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl libidn;
                 mix local.hex --force;
+                mix local.rebar --force;
                 mix deps.get;
-                mix local.rebar;
+                mix deps.compile;
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
