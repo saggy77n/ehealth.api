@@ -38,7 +38,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: postgres:9.6
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -119,7 +119,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -221,7 +221,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -323,7 +323,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -425,7 +425,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -527,7 +527,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
@@ -629,7 +629,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: lakone/postgres:9.6.11-alpine
+    image: kartoza/postgis:9.6-2.4
     ports:
     - containerPort: 5432
     tty: true
