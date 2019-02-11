@@ -38,6 +38,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -50,6 +57,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "184Mi"
+        cpu: "100m"
   - name: redis
     image: redis:5.0-alpine3.9
     ports:
@@ -57,6 +71,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "112Mi"
+        cpu: "100m"
   nodeSelector:
     node: ci
 '''
