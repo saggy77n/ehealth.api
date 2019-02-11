@@ -2,6 +2,14 @@ pipeline {
   agent none
   stages {
         stage('Test') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
           agent {
             kubernetes {
               label 'ehealth-test'
