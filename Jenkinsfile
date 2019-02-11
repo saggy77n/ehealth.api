@@ -7,7 +7,8 @@ pipeline {
         DOCKER_NAMESPACE = 'edenlabllc'
         POSTGRES_VERSION = '9.6'
         POSTGRES_USER = 'postgres'
-        POSTGRES_PASS = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
       }
       parallel {
         stage('Test') {
@@ -38,7 +39,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -86,7 +87,8 @@ spec:
             APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -119,7 +121,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -188,7 +190,8 @@ spec:
             APPS='[{"app":"casher","chart":"il","namespace":"il","deployment":"casher","label":"casher"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -221,7 +224,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -290,7 +293,8 @@ spec:
             APPS='[{"app":"graphql","chart":"il","namespace":"il","deployment":"graphql","label":"graphql"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -323,7 +327,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -392,7 +396,8 @@ spec:
             APPS='[{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -425,7 +430,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -494,7 +499,8 @@ spec:
             APPS='[{"app":"deactivate_legal_entity_consumer","chart":"il","namespace":"il","deployment":"deactivate-legal-entity-consumer","label":"deactivate-legal-entity-consumer"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -527,7 +533,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
@@ -596,7 +602,8 @@ spec:
             APPS='[{"app":"ehealth_scheduler","chart":"il","namespace":"il","deployment":"ehealth-scheduler","label":"ehealth-scheduler"}]'
             DOCKER_CREDENTIALS = 'credentials("20c2924a-6114-46dc-8e39-bfadd1cf8acf")'
             POSTGRES_USER = 'postgres'
-            POSTGRES_PASS = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
           }
           agent {
             kubernetes {
@@ -629,7 +636,7 @@ spec:
     - cat
     tty: true
   - name: postgres
-    image: kartoza/postgis:9.6-2.4
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
