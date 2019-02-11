@@ -100,7 +100,7 @@ spec:
             }
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
-                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl libidn;
                 mix local.hex --force;
                 mix deps.get;
                 mix local.rebar;
