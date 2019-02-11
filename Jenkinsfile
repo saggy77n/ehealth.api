@@ -100,6 +100,7 @@ spec:
             }
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
+                apk update && apk add --no-cache jq curl bash elixir git ncurses-libs zlib ca-certificates openssl erlang-crypto erlang-runtime-tools;
                 mix local.hex --force
                 mix local.rebar --force
                 mix deps.get
