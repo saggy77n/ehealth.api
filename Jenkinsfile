@@ -101,6 +101,7 @@ spec:
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
                 apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+                mix local.hex --force;
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
