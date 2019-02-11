@@ -1,7 +1,7 @@
 pipeline {
   agent none
   stages {
-        stage('Test') {
+    stage('Test') {
       environment {
         MIX_ENV = 'test'
         DOCKER_NAMESPACE = 'edenlabllc'
@@ -9,14 +9,12 @@ pipeline {
         POSTGRES_USER = 'postgres'
         POSTGRES_PASSWORD = 'postgres'
         POSTGRES_DB = 'postgres'
-        ADVERTISED_HOST = 'localhost'
-        ADVERTISED_PORT = '9092'
       }
-          agent {
-            kubernetes {
-              label 'ehealth-test'
-              defaultContainer 'jnlp'
-              yaml '''
+      agent {
+        kubernetes {
+          label 'ehealth-test'
+          defaultContainer 'jnlp'
+          yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
@@ -28,10 +26,6 @@ spec:
     operator: "Equal"
     value: "ci"
     effect: "NoSchedule"
-  hostAliases:
-  - ip: "127.0.0.1"
-    hostnames:
-    - "travis"
   containers:
   - name: elixir
     image: elixir:1.8.1-alpine
@@ -76,6 +70,11 @@ spec:
     ports:
     - containerPort: 2181
     - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      value: "localhost"
+    - name: ADVERTISED_PORT
+      value: "9092"
     command:
     - cat
     tty: true
