@@ -119,6 +119,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -209,6 +216,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -299,6 +313,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -389,6 +410,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -479,6 +507,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
@@ -569,6 +604,13 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "384Mi"
+        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
