@@ -173,7 +173,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
@@ -270,7 +270,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
@@ -367,7 +367,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
@@ -476,7 +476,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
@@ -573,7 +573,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
@@ -670,7 +670,7 @@ spec:
               sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
-              withCredentials(bindings: [usernamePassworde(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh 'echo " ---- step: Push docker image ---- ";'
                 sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/push-changes.sh -o push-changes.sh; bash ./push-changes.sh'
               }
