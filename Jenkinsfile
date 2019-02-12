@@ -1,86 +1,86 @@
 pipeline {
   agent none
   stages {
-//     stage('Test') {
-//       environment {
-//         MIX_ENV = 'test'
-//         DOCKER_NAMESPACE = 'edenlabllc'
-//         POSTGRES_VERSION = '9.6'
-//         POSTGRES_USER = 'postgres'
-//         POSTGRES_PASSWORD = 'postgres'
-//         POSTGRES_DB = 'postgres'
-//       }
-//       agent {
-//         kubernetes {
-//           label 'ehealth-test'
-//           defaultContainer 'jnlp'
-//           yaml '''
-// apiVersion: v1
-// kind: Pod
-// metadata:
-//   labels:
-//     stage: test
-// spec:
-//   tolerations:
-//   - key: "node"
-//     operator: "Equal"
-//     value: "ci"
-//     effect: "NoSchedule"
-//   containers:
-//   - name: elixir
-//     image: elixir:1.8.1-alpine
-//     command:
-//     - cat
-//     tty: true
-//   - name: postgres
-//     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
-//     ports:
-//     - containerPort: 5432
-//     tty: true
-//   - name: mongo
-//     image: bitnami/mongodb:4.1.7-debian-9-r7
-//     ports:
-//     - containerPort: 27017
-//     tty: true
-//     resources:
-//       requests:
-//         memory: "64Mi"
-//         cpu: "50m"
-//       limits:
-//         memory: "184Mi"
-//         cpu: "100m"
-//   - name: redis
-//     image: redis:4-alpine3.9
-//     ports:
-//     - containerPort: 6379
-//     tty: true
-//   nodeSelector:
-//     node: ci
-// '''
-//             }
-//           }
-//           steps {
-//             container(name: 'postgres', shell: '/bin/sh') {
-//               sh '''
-//               psql -U postgres -c "create database ehealth";
-//               psql -U postgres -c "create database prm_dev";
-//               psql -U postgres -c "create database fraud_dev";
-//               psql -U postgres -c "create database event_manager_dev";
-//               '''
-//             }
-//             container(name: 'elixir', shell: '/bin/sh') {
-//               sh '''
-//                 apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
-//                 sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
-//                 mix local.hex --force;
-//                 mix local.rebar --force;
-//                 mix deps.get;
-//                 mix deps.compile;
-//                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
-//               '''
-//             }
-//           }
-//         }
+    stage('Test') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
+      agent {
+        kubernetes {
+          label 'ehealth-test'
+          defaultContainer 'jnlp'
+          yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: test
+spec:
+  tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "ci"
+    effect: "NoSchedule"
+  containers:
+  - name: elixir
+    image: elixir:1.8.1-alpine
+    command:
+    - cat
+    tty: true
+  - name: postgres
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
+    ports:
+    - containerPort: 5432
+    tty: true
+  - name: mongo
+    image: bitnami/mongodb:4.1.7-debian-9-r7
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "184Mi"
+        cpu: "100m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  nodeSelector:
+    node: ci
+'''
+            }
+          }
+          steps {
+            container(name: 'postgres', shell: '/bin/sh') {
+              sh '''
+              psql -U postgres -c "create database ehealth";
+              psql -U postgres -c "create database prm_dev";
+              psql -U postgres -c "create database fraud_dev";
+              psql -U postgres -c "create database event_manager_dev";
+              '''
+            }
+            container(name: 'elixir', shell: '/bin/sh') {
+              sh '''
+                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+                sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
+                mix local.hex --force;
+                mix local.rebar --force;
+                mix deps.get;
+                mix deps.compile;
+                curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
+              '''
+            }
+          }
+        }
     stage('Test and build #1') {
       environment {
         MIX_ENV = 'test'
@@ -687,45 +687,45 @@ spec:
         }
       }
     }
-//     stage ('Deploy') {
-//       environment {
-//         APPS = '[{"app":"uaddresses_api","label":"api","namespace":"uaddresses","chart":"uaddresses", "deployment":"api"}]'
-//       }
-//       agent {
-//         kubernetes {
-//           label 'Ehealth-deploy'
-//           defaultContainer 'jnlp'
-//           yaml '''
-// apiVersion: v1
-// kind: Pod
-// metadata:
-//   labels:
-//     stage: deploy
-// spec:
-//   tolerations:
-//   - key: "node"
-//     operator: "Equal"
-//     value: "ci"
-//     effect: "NoSchedule"
-//   containers:
-//   - name: kubectl
-//     image: lachlanevenson/k8s-kubectl:v1.13.2
-//     command:
-//     - cat
-//     tty: true
-//   nodeSelector:
-//     node: ci
-// '''
-//         }
-//       }
-//       steps {
-//         container(name: 'kubectl', shell: '/bin/sh') {
-//           sh 'apk add curl bash'
-//           sh 'echo " ---- step: Deploy to cluster ---- ";'
-//           sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/autodeploy.sh -o autodeploy.sh; bash ./autodeploy.sh'
-//         }
-//       }
-//     }
+    stage ('Deploy') {
+      environment {
+        APPS = '[{"app":"uaddresses_api","label":"api","namespace":"uaddresses","chart":"uaddresses", "deployment":"api"}]'
+      }
+      agent {
+        kubernetes {
+          label 'Ehealth-deploy'
+          defaultContainer 'jnlp'
+          yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: deploy
+spec:
+  tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "ci"
+    effect: "NoSchedule"
+  containers:
+  - name: kubectl
+    image: lachlanevenson/k8s-kubectl:v1.13.2
+    command:
+    - cat
+    tty: true
+  nodeSelector:
+    node: ci
+'''
+        }
+      }
+      steps {
+        container(name: 'kubectl', shell: '/bin/sh') {
+          sh 'apk add curl bash'
+          sh 'echo " ---- step: Deploy to cluster ---- ";'
+          sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/autodeploy.sh -o autodeploy.sh; bash ./autodeploy.sh'
+        }
+      }
+    }
   }
   post { 
     success {
