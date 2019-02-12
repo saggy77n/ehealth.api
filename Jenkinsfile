@@ -86,6 +86,7 @@ spec:
                 mix local.rebar --force;
                 mix deps.get;
                 mix deps.compile;
+                sleep 600;
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
