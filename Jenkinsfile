@@ -81,7 +81,7 @@ pipeline {
 //             }
 //           }
 //         }
-    stage('Test and build') {
+    stage('Test and build #1') {
       environment {
         MIX_ENV = 'test'
         DOCKER_NAMESPACE = 'edenlabllc'
@@ -382,6 +382,18 @@ spec:
             }
           }
         }
+      }
+    }
+    stage('Test and build #2') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
+      parallel {
         stage('Build merge-legal-entities-consumer') {
           environment {
             APPS='[{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"}]'
