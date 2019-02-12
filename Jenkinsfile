@@ -66,17 +66,24 @@ spec:
         memory: "112Mi"
         cpu: "100m"
   - name: kafka
-    image: johnnypark/kafka-zookeeper:2.1.0
+    image: bitnami/kafka:latest
+    ports:
+    - containerPort: 9092
+    env:
+    - name: KAFKA_ZOOKEEPER_CONNECT
+      value: "localhost:2181"
+    - name: ALLOW_PLAINTEXT_LISTENER
+      value: "yes"
+    command:
+    - cat
+    tty: true
+  - name: zookeeper
+    image: bitnami/zookeeper:latest
     ports:
     - containerPort: 2181
-      protocol: TCP
-    - containerPort: 9092
-      protocol: TCP
     env:
-    - name: ADVERTISED_HOST
-      value: "localhost"
-    - name: TOPICS
-      value: "merge_legal_entities"
+    - name: ALLOW_ANONYMOUS_LOGIN
+      value: "yes"
     command:
     - cat
     tty: true
