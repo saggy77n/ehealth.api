@@ -65,28 +65,6 @@ spec:
       limits:
         memory: "112Mi"
         cpu: "100m"
-  - name: kafka
-    image: bitnami/kafka:latest
-    ports:
-    - containerPort: 9092
-    env:
-    - name: KAFKA_ZOOKEEPER_CONNECT
-      value: "localhost:2181"
-    - name: ALLOW_PLAINTEXT_LISTENER
-      value: "yes"
-    command:
-    - cat
-    tty: true
-  - name: zookeeper
-    image: bitnami/zookeeper:latest
-    ports:
-    - containerPort: 2181
-    env:
-    - name: ALLOW_ANONYMOUS_LOGIN
-      value: "yes"
-    command:
-    - cat
-    tty: true
   nodeSelector:
     node: ci
 '''
@@ -104,11 +82,11 @@ spec:
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
                 apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+                sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config.exs
                 mix local.hex --force;
                 mix local.rebar --force;
                 mix deps.get;
                 mix deps.compile;
-                sleep 600;
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
