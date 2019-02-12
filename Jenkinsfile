@@ -65,6 +65,21 @@ spec:
       limits:
         memory: "112Mi"
         cpu: "100m"
+  - name: kafka
+    image: johnnypark/kafka-zookeeper:2.1.0
+    ports:
+    - containerPort: 2181
+      protocol: TCP
+    - containerPort: 9092
+      protocol: TCP
+    env:
+    - name: ADVERTISED_HOST
+      value: "localhost"
+    - name: TOPICS
+      value: "merge_legal_entities"
+    command:
+    - cat
+    tty: true
   nodeSelector:
     node: ci
 '''
