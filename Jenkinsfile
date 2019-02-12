@@ -51,20 +51,6 @@ spec:
       limits:
         memory: "184Mi"
         cpu: "100m"
-  - name: redis
-    image: redis:5.0-alpine3.9
-    ports:
-    - containerPort: 6379
-    command:
-    - cat
-    tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "50m"
-      limits:
-        memory: "112Mi"
-        cpu: "100m"
   nodeSelector:
     node: ci
 '''
@@ -87,6 +73,7 @@ spec:
                 mix local.rebar --force;
                 mix deps.get;
                 mix deps.compile;
+                sleep 600
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
