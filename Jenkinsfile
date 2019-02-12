@@ -66,15 +66,13 @@ spec:
         memory: "112Mi"
         cpu: "100m"
   - name: kafka
-    image: spotify/kafka:latest
+    image: johnnypark/kafka-zookeeper:2.1.0
     ports:
     - containerPort: 2181
     - containerPort: 9092
     env:
     - name: ADVERTISED_HOST
       value: "localhost"
-    - name: ADVERTISED_PORT
-      value: "9092"
     - name: TOPICS
       value: "merge_legal_entities"
     command:
@@ -96,7 +94,7 @@ spec:
             }
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
-                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl libidn;
+                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
                 mix local.hex --force;
                 mix local.rebar --force;
                 mix deps.get;
