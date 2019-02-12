@@ -29,6 +29,9 @@ spec:
   containers:
   - name: elixir
     image: elixir:1.8.1-alpine
+    ports:
+    - containerPort: 6379
+    - containerPort: 27017
     command:
     - cat
     tty: true
@@ -37,20 +40,6 @@ spec:
     ports:
     - containerPort: 5432
     tty: true
-  - name: mongo
-    image: mongo:4.0.6-xenial
-    ports:
-    - containerPort: 27017
-    command:
-    - cat
-    tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "50m"
-      limits:
-        memory: "184Mi"
-        cpu: "100m"
   nodeSelector:
     node: ci
 '''
@@ -67,13 +56,12 @@ spec:
             }
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
-                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl redis mongodb;
                 sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
                 mix local.hex --force;
                 mix local.rebar --force;
                 mix deps.get;
                 mix deps.compile;
-                sleep 600
                 curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
               '''
             }
