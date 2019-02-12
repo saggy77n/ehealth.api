@@ -14570,7 +14570,7 @@
   {
     "name": "eHealth/risk_assessment_methods",
     "values": {
-      "default_risk_assessment_method": "зачення за замовчуванням"
+      "default_risk_assessment_method": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14581,7 +14581,7 @@
   {
     "name": "eHealth/risk_assessment_codes",
     "values": {
-      "default_risk_assessment_code": "зачення за замовчуванням"
+      "default_risk_assessment_code": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14592,7 +14592,7 @@
   {
     "name": "eHealth/risk_assessment_reasons",
     "values": {
-      "default_risk_assessment_reason": "зачення за замовчуванням"
+      "default_risk_assessment_reason": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14603,7 +14603,7 @@
   {
     "name": "eHealth/risk_assessment_outcomes",
     "values": {
-      "default_risk_assessment_outcome": "зачення за замовчуванням"
+      "default_risk_assessment_outcome": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14614,7 +14614,7 @@
   {
     "name": "eHealth/risk_assessment_qualitative_risks",
     "values": {
-      "default_risk_assessment_qualitative_risks": "зачення за замовчуванням"
+      "default_risk_assessment_qualitative_risks": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14671,7 +14671,7 @@
   {
     "name": "eHealth/service_request_recall_reasons",
     "values": {
-      "default": "Зачення за замовчуванням"
+      "default": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
@@ -14682,7 +14682,7 @@
   {
     "name": "eHealth/service_request_cancel_reasons",
     "values": {
-      "default": "Зачення за замовчуванням"
+      "default": "значення за замовчуванням"
     },
     "labels": [
       "SYSTEM",
