@@ -82,7 +82,7 @@ spec:
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
                 apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
-                sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config.exs
+                sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
                 mix local.hex --force;
                 mix local.rebar --force;
                 mix deps.get;
