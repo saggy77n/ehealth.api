@@ -29,9 +29,6 @@ spec:
   containers:
   - name: elixir
     image: elixir:1.8.1-alpine
-    ports:
-    - containerPort: 6379
-    - containerPort: 27017
     command:
     - cat
     tty: true
@@ -39,6 +36,23 @@ spec:
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
+    tty: true
+  - name: mongo
+    image: bitnami/mongodb:4.1.7-debian-9-r7
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "184Mi"
+        cpu: "100m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
     tty: true
   nodeSelector:
     node: ci
@@ -56,7 +70,7 @@ spec:
             }
             container(name: 'elixir', shell: '/bin/sh') {
               sh '''
-                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl redis mongodb;
+                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
                 sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
                 mix local.hex --force;
                 mix local.rebar --force;
