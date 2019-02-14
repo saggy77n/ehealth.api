@@ -81,7 +81,7 @@ spec:
             }
           }
         }
-    stage('Test and build #1') {
+    stage('Test and build') {
       environment {
         MIX_ENV = 'test'
         DOCKER_NAMESPACE = 'edenlabllc'
@@ -382,18 +382,6 @@ spec:
             }
           }
         }
-      }
-    }
-    stage('Test and build #2') {
-      environment {
-        MIX_ENV = 'test'
-        DOCKER_NAMESPACE = 'edenlabllc'
-        POSTGRES_VERSION = '9.6'
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'postgres'
-        POSTGRES_DB = 'postgres'
-      }
-      parallel {
         stage('Build merge-legal-entities-consumer') {
           environment {
             APPS='[{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"}]'
@@ -688,8 +676,11 @@ spec:
       }
     }
     stage ('Deploy') {
+      when {
+        branch 'develop'
+      }
       environment {
-        APPS = '[{"app":"uaddresses_api","label":"api","namespace":"uaddresses","chart":"uaddresses", "deployment":"api"}]'
+        APPS = '[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"},{"app":"casher","chart":"il","namespace":"il","deployment":"casher","label":"casher"},{"app":"graphql","chart":"il","namespace":"il","deployment":"graphql","label":"graphql"},{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"},{"app":"deactivate_legal_entity_consumer","chart":"il","namespace":"il","deployment":"deactivate-legal-entity-consumer","label":"deactivate-legal-entity-consumer"},{"app":"ehealth_scheduler","chart":"il","namespace":"il","deployment":"ehealth-scheduler","label":"ehealth-scheduler"}]'
       }
       agent {
         kubernetes {
