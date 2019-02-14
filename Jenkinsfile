@@ -1,5 +1,15 @@
 pipeline {
   agent none
+    stage('Test and build #1') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
+      parallel {
   stages {
     stage('Test') {
       environment {
@@ -81,16 +91,8 @@ spec:
             }
           }
         }
-    stage('Test and build #1') {
-      environment {
-        MIX_ENV = 'test'
-        DOCKER_NAMESPACE = 'edenlabllc'
-        POSTGRES_VERSION = '9.6'
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'postgres'
-        POSTGRES_DB = 'postgres'
-      }
-      parallel {
+
+
         stage('Build ehealth') {
           environment {
             APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
