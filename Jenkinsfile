@@ -1,5 +1,7 @@
 pipeline {
   agent none
+  stages {
+
     stage('Test and build #1') {
       environment {
         MIX_ENV = 'test'
@@ -10,7 +12,7 @@ pipeline {
         POSTGRES_DB = 'postgres'
       }
       parallel {
-  stages {
+
     stage('Test') {
       environment {
         MIX_ENV = 'test'
@@ -91,6 +93,11 @@ spec:
             }
           }
         }
+
+
+
+
+
 
 
         stage('Build ehealth') {
