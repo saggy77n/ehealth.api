@@ -164,8 +164,7 @@ spec:
               sh 'apk update && apk add --no-cache jq curl bash elixir git ncurses-libs zlib ca-certificates openssl erlang-crypto erlang-runtime-tools;'
               sh 'echo " ---- step: Build docker image ---- ";'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/build-container.sh -o build-container.sh; bash ./build-container.sh'
-              sh 'echo " ---- step
-    stage('Test and build #1: Start docker container ---- ";'
+              sh 'echo " ---- step: Start docker container ---- ";'
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
