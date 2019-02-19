@@ -1,7 +1,71 @@
 pipeline {
-  agent none
+  agent {
+    kubernetes {
+      label 'delete-instance-ehealth'
+      defaultContainer 'jnlp'
+      yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: delete-instance
+spec:
+  tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "ci"
+    effect: "NoSchedule"
+  containers:
+  - name: gcloud
+    image: google/cloud-sdk:234.0.0-alpine
+    command:
+    - cat
+    tty: true
+  nodeSelector:
+    node: ci
+'''
+    }
+  }
   stages {
-    stage('Test') {
+    stage('Prepare instance') {
+      agent {
+        kubernetes {
+          label 'prepare-instance-ehealth'
+          defaultContainer 'jnlp'
+          yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: prepare-instance
+spec:
+  tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "ci"
+    effect: "NoSchedule"
+  containers:
+  - name: gcloud
+    image: google/cloud-sdk:234.0.0-alpine
+    command:
+    - cat
+    tty: true
+  nodeSelector:
+    node: ci
+'''
+        }
+      }
+      steps {
+        container(name: 'gcloud', shell: '/bin/sh') {
+          withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
+            sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
+            sh 'gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=europe-west1-d --preemptible'
+          }
+          slackSend (color: '#8E24AA', message: "Instance for ${env.BUILD_TAG} created")
+        }
+      }
+    }
+    stage('Test and build') {
       environment {
         MIX_ENV = 'test'
         DOCKER_NAMESPACE = 'edenlabllc'
@@ -10,11 +74,21 @@ pipeline {
         POSTGRES_PASSWORD = 'postgres'
         POSTGRES_DB = 'postgres'
       }
-      agent {
-        kubernetes {
-          label 'ehealth-test'
-          defaultContainer 'jnlp'
-          yaml '''
+      parallel {
+        stage('Test') {
+          environment {
+            MIX_ENV = 'test'
+            DOCKER_NAMESPACE = 'edenlabllc'
+            POSTGRES_VERSION = '9.6'
+            POSTGRES_USER = 'postgres'
+            POSTGRES_PASSWORD = 'postgres'
+            POSTGRES_DB = 'postgres'
+          }
+          agent {
+            kubernetes {
+              label 'ehealth-test'
+              defaultContainer 'jnlp'
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -22,9 +96,9 @@ metadata:
     stage: test
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: elixir
@@ -47,22 +121,22 @@ spec:
         memory: "64Mi"
         cpu: "50m"
       limits:
-        memory: "184Mi"
-        cpu: "100m"
+        memory: "256Mi"
+        cpu: "300m"
   - name: redis
     image: redis:4-alpine3.9
     ports:
     - containerPort: 6379
     tty: true
   nodeSelector:
-    node: ci
-'''
+    node: ${BUILD_TAG}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -82,16 +156,6 @@ spec:
             }
           }
         }
-    stage('Test and build') {
-      environment {
-        MIX_ENV = 'test'
-        DOCKER_NAMESPACE = 'edenlabllc'
-        POSTGRES_VERSION = '9.6'
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'postgres'
-        POSTGRES_DB = 'postgres'
-      }
-      parallel {
         stage('Build ehealth') {
           environment {
             APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
@@ -104,7 +168,7 @@ spec:
             kubernetes {
               label 'ehealth-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -112,49 +176,50 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375 
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
-'''
+    node: ${BUILD_TAG}
+  volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -202,7 +267,7 @@ spec:
             kubernetes {
               label 'casher-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -210,49 +275,50 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375 
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
-'''
+    node: ${BUILD_TAG}
+   volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -300,7 +366,7 @@ spec:
             kubernetes {
               label 'graphql-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -308,49 +374,54 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375 
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
+    node: ${BUILD_TAG}
   volumes:
   - name: volume
     hostPath:
       path: /var/run/docker.sock
-'''
+  volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -398,7 +469,7 @@ spec:
             kubernetes {
               label 'merge-legal-entities-consumer-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -406,49 +477,50 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375 
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
-'''
+    node: ${BUILD_TAG}
+  volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -496,7 +568,7 @@ spec:
             kubernetes {
               label 'deactivate-legal-entity-consumer-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -504,49 +576,50 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375 
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
-'''
+    node: ${BUILD_TAG}
+  volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -594,7 +667,7 @@ spec:
             kubernetes {
               label 'ehealth-scheduler-build'
               defaultContainer 'jnlp'
-              yaml '''
+              yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -602,49 +675,50 @@ metadata:
     stage: build
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: docker
     image: lakone/docker:18.09-alpine3.9
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: volume
     env:
     - name: POD_IP
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    - name: DOCKER_HOST 
+      value: tcp://localhost:2375
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "384Mi"
-        cpu: "500m"
   - name: postgres
     image: edenlabllc/alpine-postgre:pglogical-gis-1.1
     ports:
     - containerPort: 5432
     tty: true
+  - name: dind
+    image: docker:18.09.2-dind
+    securityContext: 
+        privileged: true 
+    ports:
+    - containerPort: 2375
+    tty: true
+    volumeMounts: 
+    - name: docker-graph-storage 
+      mountPath: /var/lib/docker
   nodeSelector:
-    node: ci
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
-'''
+    node: ${BUILD_TAG}
+  volumes: 
+    - name: docker-graph-storage 
+      emptyDir: {}
+"""
             }
           }
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 15;
+              sleep 10;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -693,7 +767,7 @@ spec:
         kubernetes {
           label 'Ehealth-deploy'
           defaultContainer 'jnlp'
-          yaml '''
+          yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -701,9 +775,9 @@ metadata:
     stage: deploy
 spec:
   tolerations:
-  - key: "node"
+  - key: "ci"
     operator: "Equal"
-    value: "ci"
+    value: "${BUILD_TAG}"
     effect: "NoSchedule"
   containers:
   - name: kubectl
@@ -712,8 +786,8 @@ spec:
     - cat
     tty: true
   nodeSelector:
-    node: ci
-'''
+    node: ${BUILD_TAG}
+"""
         }
       }
       steps {
@@ -734,6 +808,17 @@ spec:
     }
     aborted {
       slackSend (color: 'warning', message: "ABORTED: Job - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>) canceled in ${currentBuild.durationString}")
+    }
+    always {
+      node('delete-instance-uaddresses') {
+        container(name: 'gcloud', shell: '/bin/sh') {
+          withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
+            sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
+            sh 'gcloud container node-pools delete uaddresses-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
+          }
+          slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
+        }
+      }
     }
   }
 }
