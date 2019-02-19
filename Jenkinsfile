@@ -320,7 +320,7 @@ spec:
       mountPath: /var/lib/docker
   nodeSelector:
     node: ${BUILD_TAG}
-   volumes: 
+  volumes: 
     - name: docker-graph-storage 
       emptyDir: {}
 """
@@ -419,10 +419,6 @@ spec:
       mountPath: /var/lib/docker
   nodeSelector:
     node: ${BUILD_TAG}
-  volumes:
-  - name: volume
-    hostPath:
-      path: /var/run/docker.sock
   volumes: 
     - name: docker-graph-storage 
       emptyDir: {}
