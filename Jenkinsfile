@@ -64,6 +64,17 @@ spec:
           slackSend (color: '#8E24AA', message: "Instance for ${env.BUILD_TAG} created")
         }
       }
+      post {
+        success {
+          slackSend (color: 'good', message: "Job - ${env.BUILD_TAG} STARTED (<${env.BUILD_URL}|Open>)")
+        }
+        failure {
+          slackSend (color: 'danger', message: "Job - ${env.BUILD_TAG} FAILED to start (<${env.BUILD_URL}|Open>)")
+        }
+        aborted {
+          slackSend (color: 'warning', message: "Job - ${env.BUILD_TAG} ABORTED before start (<${env.BUILD_URL}|Open>)")
+        }
+      }
     }
     stage('Test and build') {
       environment {
@@ -246,14 +257,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
         stage('Build casher') {
           environment {
@@ -345,14 +356,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
         stage('Build graphql') {
           environment {
@@ -448,14 +459,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
         stage('Build merge-legal-entities-consumer') {
           environment {
@@ -547,14 +558,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
         stage('Build deactivate-legal-entity-consumer') {
           environment {
@@ -646,14 +657,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
         stage('Build ehealth-scheduler') {
           environment {
@@ -745,14 +756,14 @@ spec:
               }
             }
           }
-          post {
-            always {
-              container(name: 'docker', shell: '/bin/sh') {
-                sh 'echo " ---- step: Remove docker image from host ---- ";'
-                sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
-              }
-            }
-          }
+          // post {
+          //   always {
+          //     container(name: 'docker', shell: '/bin/sh') {
+          //       sh 'echo " ---- step: Remove docker image from host ---- ";'
+          //       sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/remove-containers.sh -o remove-containers.sh; bash ./remove-containers.sh'
+          //     }
+          //   }
+          // }
         }
       }
     }
@@ -810,7 +821,7 @@ spec:
       slackSend (color: 'warning', message: "ABORTED: Job - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>) canceled in ${currentBuild.durationString}")
     }
     always {
-      node('delete-instance-uaddresses') {
+      node('delete-instance-ehealth') {
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
