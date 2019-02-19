@@ -76,7 +76,7 @@ spec:
         }
       }
     }
-    stage('Test and build') {
+    stage('Test') {
       environment {
         MIX_ENV = 'test'
         DOCKER_NAMESPACE = 'edenlabllc'
@@ -85,21 +85,11 @@ spec:
         POSTGRES_PASSWORD = 'postgres'
         POSTGRES_DB = 'postgres'
       }
-      parallel {
-        stage('Test') {
-          environment {
-            MIX_ENV = 'test'
-            DOCKER_NAMESPACE = 'edenlabllc'
-            POSTGRES_VERSION = '9.6'
-            POSTGRES_USER = 'postgres'
-            POSTGRES_PASSWORD = 'postgres'
-            POSTGRES_DB = 'postgres'
-          }
-          agent {
-            kubernetes {
-              label 'ehealth-test'
-              defaultContainer 'jnlp'
-              yaml """
+      agent {
+        kubernetes {
+          label 'ehealth-test'
+          defaultContainer 'jnlp'
+          yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -142,31 +132,41 @@ spec:
   nodeSelector:
     node: ${BUILD_TAG}
 """
-            }
-          }
-          steps {
-            container(name: 'postgres', shell: '/bin/sh') {
-              sh '''
-              sleep 10;
-              psql -U postgres -c "create database ehealth";
-              psql -U postgres -c "create database prm_dev";
-              psql -U postgres -c "create database fraud_dev";
-              psql -U postgres -c "create database event_manager_dev";
-              '''
-            }
-            container(name: 'elixir', shell: '/bin/sh') {
-              sh '''
-                apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
-                sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
-                mix local.hex --force;
-                mix local.rebar --force;
-                mix deps.get;
-                mix deps.compile;
-                curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
-              '''
-            }
-          }
         }
+      }
+      steps {
+        container(name: 'postgres', shell: '/bin/sh') {
+          sh '''
+            sleep 10;
+            psql -U postgres -c "create database ehealth";
+            psql -U postgres -c "create database prm_dev";
+            psql -U postgres -c "create database fraud_dev";
+            psql -U postgres -c "create database event_manager_dev";
+          '''
+        }
+        container(name: 'elixir', shell: '/bin/sh') {
+          sh '''
+            apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
+            sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
+            mix local.hex --force;
+            mix local.rebar --force;
+            mix deps.get;
+            mix deps.compile;
+            curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/tests.sh -o tests.sh; bash ./tests.sh
+          '''
+        }
+      }
+    }
+    stage('Build') {
+      environment {
+        MIX_ENV = 'test'
+        DOCKER_NAMESPACE = 'edenlabllc'
+        POSTGRES_VERSION = '9.6'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'postgres'
+        POSTGRES_DB = 'postgres'
+      }
+      parallel {
         stage('Build ehealth') {
           environment {
             APPS='[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"}]'
@@ -825,7 +825,7 @@ spec:
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools delete uaddresses-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
+            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
           }
           slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
         }
