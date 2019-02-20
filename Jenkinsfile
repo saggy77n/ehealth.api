@@ -26,9 +26,6 @@ spec:
 '''
     }
   }
-  environment {
-    ZONE = "europe-west3-b"
-  }
   stages {
     stage('Prepare instance') {
       agent {
@@ -62,7 +59,7 @@ spec:
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=$ZONE --preemptible'
+            sh 'gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=europe-west1-d --preemptible'
           }
           slackSend (color: '#8E24AA', message: "Instance for ${env.BUILD_TAG} created")
         }
@@ -980,7 +977,7 @@ spec:
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=$ZONE --cluster=dev --quiet'
+            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
           }
           slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
         }
