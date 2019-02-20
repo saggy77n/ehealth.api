@@ -26,6 +26,9 @@ spec:
 '''
     }
   }
+  environment {
+    ZONE = "europe-west$((3 + RANDOM % 2))-d"
+  }
   stages {
     stage('Prepare instance') {
       agent {
@@ -59,7 +62,7 @@ spec:
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=europe-west1-d --preemptible'
+            sh 'gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=$ZONE --preemptible'
           }
           slackSend (color: '#8E24AA', message: "Instance for ${env.BUILD_TAG} created")
         }
@@ -129,6 +132,16 @@ spec:
     ports:
     - containerPort: 6379
     tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
 """
@@ -147,7 +160,6 @@ spec:
         container(name: 'elixir', shell: '/bin/sh') {
           sh '''
             apk update && apk add --no-cache jq curl bash git ncurses-libs zlib ca-certificates openssl;
-            sed -i "s|localhost|kafka.kafka.svc.cluster.local|g" apps/core/config/config.exs
             mix local.hex --force;
             mix local.rebar --force;
             mix deps.get;
@@ -193,7 +205,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -219,6 +231,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -246,9 +285,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -292,7 +328,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -318,6 +354,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -345,9 +408,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -391,7 +451,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -417,6 +477,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -444,9 +531,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -490,7 +574,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -516,6 +600,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -543,9 +654,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -589,7 +697,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -615,6 +723,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -642,9 +777,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -688,7 +820,7 @@ spec:
     effect: "NoSchedule"
   containers:
   - name: docker
-    image: lakone/docker:18.09-alpine3.9
+    image: liubenokvlad/docker:18.09-alpine-elixir-1.8.1
     env:
     - name: POD_IP
       valueFrom:
@@ -714,6 +846,33 @@ spec:
     volumeMounts: 
     - name: docker-graph-storage 
       mountPath: /var/lib/docker
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
   nodeSelector:
     node: ${BUILD_TAG}
   volumes: 
@@ -741,9 +900,6 @@ spec:
               sh 'mix local.rebar --force'
               sh 'mix local.hex --force'
               sh 'mix deps.get'
-              sh 'sed -i "s|REDIS_URI=redis://travis:6379|REDIS_URI=redis://redis-master.redis.svc.cluster.local:6379|g" .env'
-              sh 'sed -i "s|MONGO_DB_URL=mongodb://travis:27017/taskafka|MONGO_DB_URL=mongodb://me-db-mongodb-replicaset.me-db.svc.cluster.local:27017/taskafka?replicaSet=rs0&readPreference=primary|g" .env'
-              sh 'sed -i "s/KAFKA_BROKERS_HOST=travis/KAFKA_BROKERS_HOST=kafka.kafka.svc.cluster.local/g" .env'
               sh 'sed -i "s/travis/${POD_IP}/g" .env'
               sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/start-container.sh -o start-container.sh; bash ./start-container.sh'
               withCredentials(bindings: [usernamePassword(credentialsId: '8232c368-d5f5-4062-b1e0-20ec13b0d47b', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -824,7 +980,7 @@ spec:
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
+            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=$ZONE --cluster=dev --quiet'
           }
           slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
         }
