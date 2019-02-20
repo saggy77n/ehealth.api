@@ -27,7 +27,7 @@ spec:
     }
   }
   environment {
-    ZONE = "europe-west$((3 + RANDOM % 2))-d"
+    ZONE = "europe-west((3 + RANDOM % 2))-d"
   }
   stages {
     stage('Prepare instance') {
