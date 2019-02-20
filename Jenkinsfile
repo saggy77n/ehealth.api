@@ -765,14 +765,17 @@ spec:
     }
     stage ('Deploy') {
       when {
-        branch 'develop'
+        allOf {
+            environment name: 'CHANGE_ID', value: ''
+            branch 'develop'
+        }
       }
       environment {
         APPS = '[{"app":"ehealth","chart":"il","namespace":"il","deployment":"api","label":"api"},{"app":"casher","chart":"il","namespace":"il","deployment":"casher","label":"casher"},{"app":"graphql","chart":"il","namespace":"il","deployment":"graphql","label":"graphql"},{"app":"merge_legal_entities_consumer","chart":"il","namespace":"il","deployment":"merge-legal-entities-consumer","label":"merge-legal-entities-consumer"},{"app":"deactivate_legal_entity_consumer","chart":"il","namespace":"il","deployment":"deactivate-legal-entity-consumer","label":"deactivate-legal-entity-consumer"},{"app":"ehealth_scheduler","chart":"il","namespace":"il","deployment":"ehealth-scheduler","label":"ehealth-scheduler"}]'
       }
       agent {
         kubernetes {
-          label 'Ehealth-deploy'
+          label 'ehealth-deploy'
           defaultContainer 'jnlp'
           yaml """
 apiVersion: v1
