@@ -101,7 +101,7 @@ spec:
       steps {
         container(name: 'postgres', shell: '/bin/sh') {
           sh '''
-            sleep 10;
+            sleep 15;
             psql -U postgres -c "create database ehealth";
             psql -U postgres -c "create database prm_dev";
             psql -U postgres -c "create database fraud_dev";
@@ -221,7 +221,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -344,7 +344,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -467,7 +467,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -590,7 +590,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -713,7 +713,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
@@ -836,7 +836,7 @@ spec:
           steps {
             container(name: 'postgres', shell: '/bin/sh') {
               sh '''
-              sleep 10;
+              sleep 15;
               psql -U postgres -c "create database ehealth";
               psql -U postgres -c "create database prm_dev";
               psql -U postgres -c "create database fraud_dev";
