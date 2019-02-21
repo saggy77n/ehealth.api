@@ -43,6 +43,59 @@ pipeline {
         kubernetes {
           label 'ehealth-test'
           defaultContainer 'jnlp'
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: test
+spec:
+  tolerations:
+  - key: "ci"
+    operator: "Equal"
+    value: "${BUILD_TAG}"
+    effect: "NoSchedule"
+  containers:
+  - name: elixir
+    image: elixir:1.8.1-alpine
+    command:
+    - cat
+    tty: true
+  - name: postgres
+    image: edenlabllc/alpine-postgre:pglogical-gis-1.1
+    ports:
+    - containerPort: 5432
+    tty: true
+  - name: mongo
+    image: mvertes/alpine-mongo:4.0.1-0
+    ports:
+    - containerPort: 27017
+    tty: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "300m"
+  - name: redis
+    image: redis:4-alpine3.9
+    ports:
+    - containerPort: 6379
+    tty: true
+  - name: kafkazookeeper
+    image: johnnypark/kafka-zookeeper
+    ports:
+    - containerPort: 2181
+    - containerPort: 9092
+    env:
+    - name: ADVERTISED_HOST
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
+  nodeSelector:
+    node: ${BUILD_TAG}
+"""
         }
       }
       steps {
