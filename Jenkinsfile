@@ -4,29 +4,8 @@ pipeline {
     stage('Prepare instance') {
       agent {
         kubernetes {
-          label 'prepare-delete-instance-ehealth'
+          label 'create-instance'
           defaultContainer 'jnlp'
-          yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    stage: prepare-instance
-spec:
-  tolerations:
-  - key: "node"
-    operator: "Equal"
-    value: "ci"
-    effect: "NoSchedule"
-  containers:
-  - name: gcloud
-    image: google/cloud-sdk:234.0.0-alpine
-    command:
-    - cat
-    tty: true
-  nodeSelector:
-    node: ci
-'''
         }
       }
       steps {
@@ -150,6 +129,7 @@ spec:
         POSTGRES_PASSWORD = 'postgres'
         POSTGRES_DB = 'postgres'
       }
+      failFast true
       parallel {
         stage('Build ehealth') {
           environment {
@@ -948,7 +928,7 @@ spec:
       slackSend (color: 'warning', message: "ABORTED: Job - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>) canceled in ${currentBuild.durationString}")
     }
     always {
-      node('prepare-delete-instance-ehealth') {
+      node('jenkins-jenkins-slave') {
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'apk update && apk add curl bash'
