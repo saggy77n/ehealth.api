@@ -5,7 +5,7 @@ pipeline {
       agent {
         kubernetes {
           label 'create-instance'
-          defaultContainer 'jnlp'
+          defaultContainer 'gcloud'
         }
       }
       steps {
