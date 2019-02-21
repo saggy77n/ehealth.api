@@ -57,18 +57,10 @@ spec:
       }
       steps {
         container(name: 'gcloud', shell: '/bin/sh') {
+          sh 'apk update && apk add curl bash'
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            script {
-              for (i = 0; i < 10; i++) {
-                sh '''
-                gcloud container node-pools create ehealth-build-${BUILD_NUMBER} --cluster=dev --machine-type=n1-highcpu-16 --node-taints=ci=${BUILD_TAG}:NoSchedule --node-labels=node=${BUILD_TAG} --num-nodes=1 --zone=europe-west1-d --preemptible || FAIL=1;
-                  if  [  $FAIL == 1 ]; then
-                  sleep 25
-                  continue
-                  fi
-                '''
-              }
+            sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/create_instance.sh -o create_instance.sh; bash ./create_instance.sh'
             }
           }
           slackSend (color: '#8E24AA', message: "Instance for ${env.BUILD_TAG} created")
