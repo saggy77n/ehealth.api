@@ -4,8 +4,30 @@ pipeline {
     stage('Prepare instance') {
       agent {
         kubernetes {
+          name 'gcloud-create'
           label 'create-instance'
           defaultContainer 'jnlp'
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    stage: prepare-instance
+spec:
+  tolerations:
+  - key: "node"
+    operator: "Equal"
+    value: "ci"
+    effect: "NoSchedule"
+  containers:
+  - name: gcloud
+    image: google/cloud-sdk:234.0.0-alpine
+    command:
+    - cat
+    tty: true
+  nodeSelector:
+    node: ci
+"""
         }
       }
       steps {
