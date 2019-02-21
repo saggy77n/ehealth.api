@@ -1,36 +1,10 @@
 pipeline {
-  agent {
-    kubernetes {
-      label 'delete-instance-ehealth'
-      defaultContainer 'jnlp'
-      yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    stage: delete-instance
-spec:
-  tolerations:
-  - key: "node"
-    operator: "Equal"
-    value: "ci"
-    effect: "NoSchedule"
-  containers:
-  - name: gcloud
-    image: google/cloud-sdk:234.0.0-alpine
-    command:
-    - cat
-    tty: true
-  nodeSelector:
-    node: ci
-'''
-    }
-  }
+  agent none
   stages {
     stage('Prepare instance') {
       agent {
         kubernetes {
-          label 'prepare-instance-ehealth'
+          label 'prepare-delete-instance-ehealth'
           defaultContainer 'jnlp'
           yaml '''
 apiVersion: v1
@@ -974,11 +948,12 @@ spec:
       slackSend (color: 'warning', message: "ABORTED: Job - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>) canceled in ${currentBuild.durationString}")
     }
     always {
-      node('delete-instance-ehealth') {
+      node('prepare-delete-instance-ehealth') {
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
+            sh 'apk update && apk add curl bash'
             sh 'gcloud auth activate-service-account jenkins-pool@ehealth-162117.iam.gserviceaccount.com --key-file=${KEYFILE} --project=ehealth-162117'
-            sh 'gcloud container node-pools delete ehealth-build-${BUILD_NUMBER} --zone=europe-west1-d --cluster=dev --quiet'
+            sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/delete_instance.sh -o delete_instance.sh; bash ./delete_instance.sh'
           }
           slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
         }
