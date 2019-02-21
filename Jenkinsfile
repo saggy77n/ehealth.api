@@ -4,9 +4,9 @@ pipeline {
     stage('Prepare instance') {
       agent {
         kubernetes {
-          name 'gcloud-create'
           label 'create-instance'
           defaultContainer 'jnlp'
+          instanceCap '4'
           yaml """
 apiVersion: v1
 kind: Pod
