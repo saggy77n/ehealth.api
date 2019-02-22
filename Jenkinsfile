@@ -1,5 +1,8 @@
 pipeline {
   agent none
+    environment {
+      PROJECT_NAME = 'ehealth-build'
+    }
   stages {
     stage('Prepare instance') {
       agent {
