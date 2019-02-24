@@ -955,7 +955,7 @@ spec:
     }
     always {
       node('delete-instance') {
-        withCheckout(scm) {
+        checkout {
          sh 'echo "GIT_COMMIT is ${env.GIT_COMMIT}"'
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
