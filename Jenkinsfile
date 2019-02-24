@@ -954,9 +954,7 @@ spec:
       slackSend (color: 'warning', message: "ABORTED: Job - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>) canceled in ${currentBuild.durationString}")
     }
     always {
-      node('delete-instance') {
-        checkout {
-         sh 'echo "GIT_COMMIT is ${env.GIT_COMMIT}"'
+      node('create-instance') {
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             sh 'apk update && apk add curl bash'
@@ -967,7 +965,6 @@ spec:
             sh 'curl -s https://raw.githubusercontent.com/edenlabllc/ci-utils/umbrella_jenkins/delete_instance.sh -o delete_instance.sh; bash ./delete_instance.sh'
           }
           slackSend (color: '#4286F5', message: "Instance for ${env.BUILD_TAG} deleted")
-        }
         }
       }
     }
