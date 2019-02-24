@@ -955,11 +955,11 @@ spec:
     }
     always {
       node('delete-instance') {
-        checkout scm
+        // checkout scm
         container(name: 'gcloud', shell: '/bin/sh') {
           withCredentials([file(credentialsId: 'e7e3e6df-8ef5-4738-a4d5-f56bb02a8bb2', variable: 'KEYFILE')]) {
             checkout scm
-            sh 'apk update && apk add curl bash'
+            sh 'apk update && apk add curl bash git'
             sh 'echo ${GIT_COMMIT:0:7}'
             sh 'echo ${GIT_COMMIT}'
             sh "echo ${env.GIT_COMMIT}"
