@@ -2,6 +2,7 @@ pipeline {
   agent none
     environment {
       PROJECT_NAME = 'ehealth'
+      INSTANCE_TYPE = 'n1-highcpu-16'
     }
   stages {
     stage('Prepare instance') {
