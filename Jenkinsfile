@@ -1,4 +1,3 @@
-def RD = "${UUID.randomUUID().toString()}"
 pipeline {
   agent none
   environment {
