@@ -4,6 +4,7 @@ pipeline {
   environment {
     PROJECT_NAME = 'ehealth'
     INSTANCE_TYPE = 'n1-highcpu-16'
+    RD = "${UUID.randomUUID().toString()}"
   }
   stages {
     stage('Prepare instance') {
