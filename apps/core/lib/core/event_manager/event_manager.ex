@@ -34,8 +34,7 @@ defmodule Core.EventManager do
   defp create_event(entity, user_id, properties) do
     entity_type =
       entity.__struct__
-      |> to_string()
-      |> String.split(".")
+      |> Module.split()
       |> List.last()
 
     %Event{
